@@ -10,3 +10,12 @@ reqwest = "0.11.22"
 scraper = "0.17.1"
 tokio = { version = "1.33.0", features = ["full"] }
 
+[profile.release]
+strip = true        # Automatically strip symbols from the binary.
+opt-level = "z"     # Optimize for size.
+lto = true          # Use Link Time Optimization.
+codegen-units = 1   # Compile the whole crate at once.
+debug = false       # Strip debug symbols from the binary.
+
+[profile.dev]
+debug = true
