@@ -1,25 +1,39 @@
-use std::collections::HashMap;
 use reqwest::Client;
 use scraper::{Html, Selector};
 
 #[tokio::main]
 async fn main() {
     let client = Client::new();
-    let response = client.get("https://mig.kz/exchange/").send().await.unwrap();
-    let document = Html::parse_document(&response.text().unwrap());
+    let response = client.get("https://mig.kz/").send().await.unwrap();
+    let document = Html::parse_document(&response.text().await.unwrap());
 
-    let mut exchange_rates = HashMap::new();
+    let table_selector = Selector::parse(".informer tbody tr").unwrap();
+    let currency_selector = Selector::parse(".currency").unwrap();
+    let buy_selector = Selector::parse(".buy").unwrap();
+    let sell_selector = Selector::parse(".sell").unwrap();
+    for element in document.select(&table_selector) {
+        let currency = element.select(&currency_selector).map(|x| x.inner_html());
+        let mut currency_str = String::new();
+        for c in currency {
+            currency_str = c;
+            // println!("{}", c);
+        }
 
-    let selector = Selector::parse(".informer tbody tr").unwrap();
-    for element in document.select(&selector) {
-        let currency = element.select(".currency").first().unwrap().text().contents().collect::<Vec<_>>()[0].clone();
-        let buy = element.select(".buy").first().unwrap().text().contents().collect::<Vec<_>>()[0].clone();
-        let sell = element.select(".sell").first().unwrap().text().contents().collect::<Vec<_>>()[0].clone();
+        let buy = element.select(&buy_selector).map(|x| x.inner_html());
+        let mut buy_str = String::new();
+        for b in buy {
+            buy_str = b;
+            // println!("{}", c);
+        }
 
-        exchange_rates.insert(currency, (buy, sell));
+        let sell = element.select(&sell_selector).map(|x| x.inner_html());
+        let mut sell_str = String::new();
+        for s in sell {
+            sell_str = s;
+            // println!("{}", c);
+        }
+
+        println!("{}: buy {} sell {}", currency_str, buy_str, sell_str);
     }
 
-    for (currency, (buy, sell)) in exchange_rates.iter() {
-        println!("{}: buy {} sell {}", currency, buy, sell);
-    }
 }
