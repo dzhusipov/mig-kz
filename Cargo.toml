@@ -6,7 +6,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = { version = "0.11.22", features = ["json", "rustls-tls"], default-features = false }
 scraper = "0.17.1"
 tokio = { version = "1.33.0", features = ["full"] }
 
@@ -19,3 +18,12 @@ debug = false       # Strip debug symbols from the binary.
 
 [profile.dev]
 debug = true
+
+[target.aarch64-apple-darwin.dependencies]
+reqwest = { version = "0.11.22", features = ["json"]}
+
+[target.x86_64-unknown-linux-gnu.dependencies]
+reqwest = { version = "0.11.22", features = ["json", "rustls-tls"], default-features = false }
+
+[target.x86_64-unknown-linux-musl.dependencies]
+reqwest = { version = "0.11.22", features = ["json", "rustls-tls"], default-features = false }

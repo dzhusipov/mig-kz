@@ -13,8 +13,15 @@ pub struct AllCurrencies {
 
 impl AllCurrencies {
     pub async fn new() -> AllCurrencies {
-        let client = Client::new();
-        let response = client.get("https://mig.kz/").send().await.unwrap();
+        let client = reqwest::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap();
+    let response = client
+        .get("https://mig.kz/")
+        .send()
+        .await.unwrap();
+
         let document = Html::parse_document(&response.text().await.unwrap());
 
         let table_selector = Selector::parse(".informer tbody tr").unwrap();
