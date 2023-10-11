@@ -5,6 +5,9 @@ use models::currency::AllCurrencies;
 async fn main() {
     let currencies = AllCurrencies::new().await;
     for currency in currencies.currencies {
-        println!("{}: buy {} sell {}", currency.currency, currency.buy, currency.sell);
+        println!(
+            "{}: buy {} sell {}",
+            currency.currency, currency.buy, currency.sell,
+        );
     }
 }

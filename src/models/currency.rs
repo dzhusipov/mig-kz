@@ -4,11 +4,11 @@ use scraper::{Html, Selector};
 pub struct Currency {
     pub currency: String,
     pub buy: String,
-    pub sell: String
+    pub sell: String,
 }
 
 pub struct AllCurrencies {
-    pub currencies: Vec<Currency>
+    pub currencies: Vec<Currency>,
 }
 
 impl AllCurrencies {
@@ -46,7 +46,7 @@ impl AllCurrencies {
             let currency_model = Currency {
                 currency: currency_str.to_owned(),
                 buy: buy_str.to_owned(),
-                sell: sell_str.to_owned()
+                sell: sell_str.to_owned(),
             };
 
             //println!("{}: buy {} sell {}", currency_str, buy_str, sell_str);
@@ -54,8 +54,7 @@ impl AllCurrencies {
         }
 
         AllCurrencies {
-            currencies: currency_arr
+            currencies: currency_arr,
         }
-       
     }
 }
