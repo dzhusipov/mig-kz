@@ -1,4 +1,4 @@
-all: test build
+all: build-test
 
 fmt:
 	cargo fmt --all -- --check
@@ -29,3 +29,10 @@ build:
 	ls -lh target/release
 	ls -lh target/x86_64-unknown-linux-gnu/release
 	ls -lh target/x86_64-unknown-linux-musl/release
+
+docker:
+	docker stop zhus_sip_stack || true
+	docker rm zhus_sip_stack || true
+	docker rmi zhus_sip_stack_img || true
+	docker build -t zhus_sip_stack_img -f Dockerfile.local .
+	docker run -d --name zhus_sip_stack zhus_sip_stack_img

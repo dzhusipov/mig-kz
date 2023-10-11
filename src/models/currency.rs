@@ -13,14 +13,11 @@ pub struct AllCurrencies {
 
 impl AllCurrencies {
     pub async fn new() -> AllCurrencies {
-        let client = reqwest::Client::builder()
-        .danger_accept_invalid_certs(true)
-        .build()
-        .unwrap();
-    let response = client
-        .get("https://mig.kz/")
-        .send()
-        .await.unwrap();
+        let client = Client::builder()
+            .danger_accept_invalid_certs(true)
+            .build()
+            .unwrap();
+        let response = client.get("https://mig.kz/").send().await.unwrap();
 
         let document = Html::parse_document(&response.text().await.unwrap());
 
@@ -34,21 +31,18 @@ impl AllCurrencies {
             let mut currency_str = String::new();
             for c in currency {
                 currency_str = c;
-                // println!("{}", c);
             }
 
             let buy = element.select(&buy_selector).map(|x| x.inner_html());
             let mut buy_str = String::new();
             for b in buy {
                 buy_str = b;
-                // println!("{}", c);
             }
 
             let sell = element.select(&sell_selector).map(|x| x.inner_html());
             let mut sell_str = String::new();
             for s in sell {
                 sell_str = s;
-                // println!("{}", c);
             }
             let currency_model = Currency {
                 currency: currency_str.to_owned(),
@@ -56,7 +50,6 @@ impl AllCurrencies {
                 sell: sell_str.to_owned(),
             };
 
-            //println!("{}: buy {} sell {}", currency_str, buy_str, sell_str);
             currency_arr.push(currency_model);
         }
 
