@@ -1,4 +1,6 @@
 mod models;
+mod service;
+
 use models::currency::AllCurrencies;
 
 #[tokio::main]

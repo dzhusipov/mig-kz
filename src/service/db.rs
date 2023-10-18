@@ -11,7 +11,7 @@ struct Currency {
     
 impl Currency {
     fn from_row(row: &rusqlite::Row) -> Self {
-        Self {
+        Currency {
             id: row.get(0).unwrap(),
             currency: row.get(1).unwrap(),
             buy: row.get(2).unwrap(),
