@@ -9,6 +9,7 @@ edition = "2021"
 rusqlite = "0.29.0"
 scraper = "0.17.1"
 tokio = { version = "1.33.0", features = ["full"] }
+chrono = "0.4.31"
 
 [profile.release]
 strip = true        # Automatically strip symbols from the binary.

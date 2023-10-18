@@ -16,6 +16,8 @@ impl Currency {
             currency: row.get(1).unwrap(),
             buy: row.get(2).unwrap(),
             sell: row.get(3).unwrap(),
+            // current date
+            updated_at: Local::now().naive_local(),
         }
     }
 }
