@@ -1,6 +1,7 @@
 use rusqlite::{params, Connection, Result};
-use chrono::NaiveDateTime;
+use chrono::{NaiveDateTime, Local};
 
+#[allow(dead_code)]
 struct Currency {
     id: i32,
     currency: String,
@@ -10,6 +11,7 @@ struct Currency {
 }
     
 impl Currency {
+    #[allow(dead_code)]
     fn from_row(row: &rusqlite::Row) -> Self {
         Currency {
             id: row.get(0).unwrap(),
@@ -22,11 +24,13 @@ impl Currency {
     }
 }
 
+#[allow(dead_code)]
 fn connect_to_database() -> Result<Connection> {
     let conn = Connection::open("db/mig.db")?;
     Ok(conn)
 }
 
+#[allow(dead_code)]
 fn get_currency(conn: &Connection, id: i32) -> Result<Option<Currency>> {
     let mut stmt = conn.prepare("SELECT id, currency, buy, sell FROM currencies WHERE id = ?1")?;
     let mut rows = stmt.query(params![id])?;
@@ -38,6 +42,7 @@ fn get_currency(conn: &Connection, id: i32) -> Result<Option<Currency>> {
     }
 }
 
+#[allow(dead_code)]
 fn put_currency(conn: &Connection, currency: &Currency) -> Result<()> {
     conn.execute(
         "INSERT INTO currencies (currency, buy, sell) VALUES (?1, ?2, ?3, ?4)",
@@ -47,6 +52,7 @@ fn put_currency(conn: &Connection, currency: &Currency) -> Result<()> {
     Ok(())
 }
 
+#[allow(dead_code)]
 fn update_currency(conn: &Connection, currency: &Currency) -> Result<()> {
     conn.execute(
         "UPDATE currencies SET currency = ?2, buy = ?3, sell = ?4 WHERE id = ?1",

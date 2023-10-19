@@ -1,6 +1,9 @@
 use reqwest::Client;
 use scraper::{Html, Selector};
+use postgres_types::ToSql;
+use postgres_types::FromSql;
 
+#[derive(Debug, ToSql, FromSql)]
 pub struct Currency {
     pub currency: String,
     pub buy: String,
