@@ -46,7 +46,12 @@ fn get_currency(conn: &Connection, id: i32) -> Result<Option<Currency>> {
 fn put_currency(conn: &Connection, currency: &Currency) -> Result<()> {
     conn.execute(
         "INSERT INTO currencies (currency, buy, sell) VALUES (?1, ?2, ?3, ?4)",
-        params![currency.currency, currency.buy, currency.sell, currency.updated_at],
+        params![
+            currency.currency, 
+            currency.buy, 
+            currency.sell, 
+            currency.updated_at
+        ],
     )?;
 
     Ok(())
@@ -56,7 +61,12 @@ fn put_currency(conn: &Connection, currency: &Currency) -> Result<()> {
 fn update_currency(conn: &Connection, currency: &Currency) -> Result<()> {
     conn.execute(
         "UPDATE currencies SET currency = ?2, buy = ?3, sell = ?4 WHERE id = ?1",
-        params![currency.id, currency.currency, currency.buy, currency.sell],
+        params![
+            currency.id, 
+            currency.currency, 
+            currency.buy, 
+            currency.sell
+        ],
     )?;
 
     Ok(())
