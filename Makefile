@@ -1,4 +1,4 @@
-all: build-test
+all: build
 
 fmt:
 	cargo fmt --all -- --check
@@ -17,6 +17,7 @@ build-test: fmt clippy
 	ls -lh target/release
 	ls -lh target/x86_64-unknown-linux-gnu/release
 	ls -lh target/x86_64-unknown-linux-musl/release
+	
 
 build:
 	cargo clean
