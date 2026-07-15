@@ -1,36 +1,21 @@
 [package]
 name = "mig-kz"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
 rusqlite = { version = "0.29.0", features = ["chrono", "bundled"] }
 scraper = "0.18.1"
 tokio = { version = "1.33.0", features = ["full"] }
-chrono = "0.4.31"
-postgres-types = {version = "0.2.6", features = ["derive"] }
+chrono = { version = "0.4.31", features = ["serde"] }
+reqwest = { version = "0.11.22", default-features = false, features = ["json", "rustls-tls"] }
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+anyhow = "1.0.86"
 
 [profile.release]
-strip = true        # Automatically strip symbols from the binary.
-opt-level = "z"     # Optimize for size.
-lto = true          # Use Link Time Optimization.
-codegen-units = 1   # Compile the whole crate at once.
-debug = false       # Strip debug symbols from the binary.
-
-[profile.dev]
-debug = true
-
-[target.aarch64-apple-darwin.dependencies]
-reqwest = { version = "0.11.22", features = ["json"]}
-
-[target.x86_64-unknown-linux-gnu.dependencies]
-reqwest = { version = "0.11.22", features = ["json", "rustls-tls"], default-features = false }
-
-[target.x86_64-unknown-linux-musl.dependencies]
-reqwest = { version = "0.11.22", features = ["json", "rustls-tls"], default-features = false }
-
-[target.x86_64-pc-windows-msvc.dependencies]
-reqwest = { version = "0.11.22", features = ["json", "rustls-tls"], default-features = false }
-
-[target.x86_64-pc-windows-gnu.dependencies]
-reqwest = { version = "0.11.22", features = ["json", "rustls-tls"], default-features = false }
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+debug = false
