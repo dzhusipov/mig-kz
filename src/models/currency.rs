@@ -380,3 +380,130 @@ mod tests {
         );
     }
 }
+
+#[cfg(test)]
+mod integration_tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_real_mig_kz_request() {
+        // Делаем реальный запрос к mig.kz, парсим HTML и проверяем результат
+        let client = reqwest::Client::builder()
+            .user_agent("mig-kz-currency-checker/0.2-test")
+            .build()
+            .unwrap();
+
+        let response = client
+            .get("https://mig.kz/")
+            .send()
+            .await
+            .expect("HTTP request to mig.kz should succeed");
+
+        assert!(
+            response.status().is_success(),
+            "mig.kz returned non-success status: {}",
+            response.status()
+        );
+
+        let body = response
+            .text()
+            .await
+            .expect("Should read response body");
+
+        // Проверяем что HTML содержит ожидаемые элементы
+        assert!(
+            body.contains("<td class=\"currency\">"),
+            "HTML should contain currency cells"
+        );
+        assert!(
+            body.contains("<td class=\"buy"),
+            "HTML should contain buy rate cells"
+        );
+        assert!(
+            body.contains("<td class=\"sell"),
+            "HTML should contain sell rate cells"
+        );
+
+        // Парсим курсы
+        let currencies = parse_html(&body)
+            .expect("parse_html should succeed on real mig.kz page");
+
+        // Должно быть хотя бы 7 валют (USD, EUR, RUB, KGS, GBP, CNY, GOLD)
+        assert!(
+            currencies.len() >= 7,
+            "Expected at least 7 currencies, got {}",
+            currencies.len()
+        );
+
+        // Проверяем что USD есть
+        let usd = currencies.iter().find(|c| c.currency == "USD");
+        assert!(
+            usd.is_some(),
+            "USD should be present in the currency list"
+        );
+        let usd = usd.unwrap();
+
+        // USD buy < sell — это всегда так
+        assert!(
+            usd.buy < usd.sell,
+            "USD buy ({}) should be less than sell ({})",
+            usd.buy,
+            usd.sell
+        );
+
+        // USD buy должен быть в разумном диапазоне (100–1000 тенге)
+        assert!(
+            usd.buy > 100.0 && usd.buy < 1000.0,
+            "USD buy rate {} is out of reasonable range (100–1000)",
+            usd.buy
+        );
+
+        // Выводим все курсы для проверки
+        println!("\n=== Реальные курсы mig.kz ===");
+        for cur in &currencies {
+            println!("  {}: buy {:.2}  sell {:.2}", cur.currency, cur.buy, cur.sell);
+        }
+        println!("============================\n");
+    }
+
+    #[tokio::test]
+    async fn test_real_mig_kz_all_currencies_have_valid_rates() {
+        let client = reqwest::Client::builder()
+            .user_agent("mig-kz-currency-checker/0.2-test")
+            .build()
+            .unwrap();
+
+        let response = client
+            .get("https://mig.kz/")
+            .send()
+            .await
+            .expect("request should succeed");
+
+        let body = response.text().await.expect("should read body");
+        let currencies = parse_html(&body).expect("should parse");
+
+        for cur in &currencies {
+            assert!(
+                cur.buy > 0.0,
+                "buy rate for {} should be positive: {}",
+                cur.currency,
+                cur.buy
+            );
+            assert!(
+                cur.sell > 0.0,
+                "sell rate for {} should be positive: {}",
+                cur.currency,
+                cur.sell
+            );
+            assert!(
+                cur.sell > cur.buy,
+                "sell ({}) should be > buy ({}) for {}",
+                cur.sell,
+                cur.buy,
+                cur.currency
+            );
+        }
+
+        println!("\nВсе {} валют имеют валидные курсы (buy < sell, оба > 0)\n", currencies.len());
+    }
+}
