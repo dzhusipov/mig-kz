@@ -19,3 +19,4 @@ opt-level = "z"
 lto = true
 codegen-units = 1
 debug = false
+panic = "abort"
