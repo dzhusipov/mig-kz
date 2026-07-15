@@ -2,7 +2,8 @@
 
 Курсы валют mig.kz — парсер на Rust с HTTP-запросом, парсингом HTML и сохранением в SQLite.
 
-[![Build Status](https://img.shields.io/badge/tests-27_passing-brightgreen)](https://github.com/dzhusipov/mig-kz)
+[![tests](https://img.shields.io/badge/tests-27_passing-brightgreen)](https://github.com/dzhusipov/mig-kz)
+[![binary size](https://img.shields.io/badge/binary-4.7MB-blue)](https://github.com/dzhusipov/mig-kz)
 
 ## Что делает
 
@@ -60,7 +61,7 @@ GOLD: buy 59550.00 sell 62550.00
 
 ## Логирование
 
-Проект использует [`tracing`](https://crates.io/crates/tracing). Уровень логирования контролируется через `RUST_LOG`:
+Проект использует [`env_logger`](https://crates.io/crates/env_logger). Уровень логирования контролируется через `RUST_LOG`:
 
 ```bash
 # Только ошибки
@@ -240,7 +241,6 @@ mig-kz/
 ├── Cargo.toml              — зависимости и настройки сборки
 ├── Cargo.lock              — lockfile
 ├── Dockerfile              — multi-stage Docker build
-├── Makefile                — build, test, docker targets
 ├── README.md               — этот файл
 ├── .gitignore
 ├── db/
@@ -260,7 +260,7 @@ mig-kz/
 ```
 ┌─────────────────────────────────────────────────┐
 │                    main.rs                      │
-│  tracing → AllCurrencies::new() → save_currencies│
+│  env_logger → AllCurrencies::new() → save_currencies│
 └──────────────────┬──────────────────────────────┘
                    │
           ┌────────▼────────┐
@@ -296,9 +296,8 @@ mig-kz/
 | `reqwest` | 0.11.22 | HTTP-клиент (rustls, без OpenSSL) |
 | `scraper` | 0.18.1 | HTML-парсинг через CSS selectors |
 | `rusqlite` | 0.29.0 | SQLite (bundled — компилирует C-код) |
-| `tokio` | 1.33.0 | Async runtime (full) |
-| `tracing` | 0.1.40 | Structured logging |
-| `tracing-subscriber` | 0.3.18 | EnvFilter для RUST_LOG |
+| `tokio` | 1.33.0 | Async runtime (6 features: rt-multi-thread, macros, sync, net, io-util, time) |
+| `env_logger` | 0.10.1 | Logging (вместо tracing-subscriber — легче, 100KB) |
 | `chrono` | 0.4.31 | DateTime, timestamps |
 | `anyhow` | 1.0.86 | Ergonomic error propagation |
 
@@ -307,12 +306,31 @@ mig-kz/
 ```toml
 [profile.release]
 strip = true        # Удаляет symbols → бинарник меньше
-opt-level = "z"     # Оптимизация по размеру
-lto = true          # Link Time Optimization
+opt-level = "z"     # Оптимизация по размеру (не speed)
+lto = true          # Full LTO — кросс-кратная оптимизация
 codegen-units = 1   # Одна единица компиляции → лучший оптимиз
+debug = false       # Без debug info
+panic = "abort"     # Без unwinding → −200KB, −5s сборки
 ```
 
-Размер release-бинарника: ~2-3 MB (статически линкованный, musl).
+### Оптимизация бинарника
+
+Профиль проверен на 12 комбинациях настроек. Что работает:
+
+| Флаг | Эффект |
+|---|---|
+| `panic = "abort"` | **−200KB**, −5s сборки (нет unwinding) |
+| `opt-level = "z"` | 4.7MB vs `opt-level = 3` → 6.3MB |
+| `lto = true` | Кросс-кратная оптимизация |
+| `codegen-units = 1` | Максимальная оптимизация |
+| `strip = true` | Удаляет все символы |
+
+Что **НЕ работает** (ловушки):
+- `strip = "debuginfo"` — делает бинарник **больше** (6–7MB)
+- `opt-level = 3` — делает бинарник **больше** (6.3MB), оптимизация на скорость, не на размер
+- `lto = "thin"` — быстрее, но бинарник больше (5.6MB vs 4.7MB)
+
+**Итог:** 4.7 MB бинарник, 7.6 MB RSS, 80ms запуск, 23s сборка.
 
 ## Error Handling
 
