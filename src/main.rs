@@ -8,16 +8,16 @@ use std::process;
 use models::currency::AllCurrencies;
 use service::db::{save_currencies, get_last_update};
 
-#[tokio::main]
-async fn main() {
-    tracing_subscriber::fmt()
-        .with_env_filter(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "mig_kz=info".into()),
-        )
-        .init();
+fn main() {
+    env_logger::Builder::from_env(
+        env_logger::Env::default().default_filter_or("mig_kz=info"),
+    )
+    .init();
 
-    if let Err(e) = run().await {
+    if let Err(e) = tokio::runtime::Runtime::new()
+        .expect("tokio runtime")
+        .block_on(run())
+    {
         tracing::error!("{}", e);
         process::exit(1);
     }
@@ -74,7 +74,6 @@ mod tests {
 
     #[test]
     fn test_get_db_path_fallback() {
-        // Когда exe не существует (в тестах), должен вернуть fallback путь
         let path = get_db_path();
         assert_eq!(path, PathBuf::from("db/mig.db"));
     }
@@ -82,7 +81,6 @@ mod tests {
     #[test]
     fn test_get_db_path_returns_valid_pathbuf() {
         let path = get_db_path();
-        // Путь должен содержать "db/mig.db"
         assert!(path.to_string_lossy().contains("mig.db"));
     }
 }
