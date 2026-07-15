@@ -67,3 +67,22 @@ fn get_db_path() -> PathBuf {
 
     PathBuf::from("db/mig.db")
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_get_db_path_fallback() {
+        // Когда exe не существует (в тестах), должен вернуть fallback путь
+        let path = get_db_path();
+        assert_eq!(path, PathBuf::from("db/mig.db"));
+    }
+
+    #[test]
+    fn test_get_db_path_returns_valid_pathbuf() {
+        let path = get_db_path();
+        // Путь должен содержать "db/mig.db"
+        assert!(path.to_string_lossy().contains("mig.db"));
+    }
+}
